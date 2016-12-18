@@ -1,50 +1,68 @@
 <?php
 
-require_once ( dirname(__FILE__) . '/../Components/StructDerectory.php');
-require_once ( dirname(__FILE__) . '/../Components/RawMaterials.php');
-require_once ( dirname(__FILE__) . '/../Core/JsonManipulatorS3.php');
+date_default_timezone_set('Europe/London');
 
-use Core\JsonManipulatorS3;
-use Components\StructDerectory;
+require_once ( dirname(__FILE__) . '/../Components/RawMaterials.php');
+require_once ( dirname(__FILE__) . '/../Components/StructDerectory.php');
+require_once ( dirname(__FILE__) . '/../Core/Variable.php');
+require_once ( dirname(__FILE__) . '/../Core/FFmpgeEngine.php');
+
 use Components\RawMaterials;
+use Components\StructDerectory;
+use Components\Temp;
+use Core\Variable;
+use Core\FFmpgeEngine;
 
 try {
     
-    $FileName = filter_input(INPUT_GET, "FileName");
-    $Duration = filter_input(INPUT_GET, "Duration");
-           
-    if($FileName == null){
+    $Variable = new Variable();
     
-        throw new Exception("The required parameter was not provided.", "2404");
-    }
+    $FileName = $Variable->ReadMandatory("FileName");
+    $Duration = $Variable->ReadMandatory("Duration");
+    $Height = $Variable->ReadMandatory("Height");
+    $Width = $Variable->ReadMandatory("Width");
     
-    if (strpos($FileName, ".mp4") === false) {
-        throw new Exception("The video must be mp4.", "2004");
-    }
+    $RawMaterials = new RawMaterials();  
     
-    if($Duration == null){
-    
-        throw new Exception("The required parameter was not provided.", "2404");
-    }
-    
-    $RawMaterials = new RawMaterials();
     $RawMaterials->TempFile = $FileName;
     $RawMaterials->Duration = $Duration;
+    $RawMaterials->Height = $Height;
+    $RawMaterials->Width = $Width;
     
-    $JsonManipulator = new JsonManipulatorS3(StructDerectory::RawMaterials);   
+    $Directory = $RawMaterials->getFileManipulator()->SetFile($RawMaterials->ID);
+    $RawMaterials->getFileManipulator()->CreateDirectory($Directory);
     
-    $JsonManipulator->SaveJsonFile($RawMaterials);
+    $Sourse = $RawMaterials->getFileManipulator()->ReadFile($FileName, StructDerectory::Temp, Temp::Video);
+    $Destination = $RawMaterials->getFileManipulator()->SetFile($RawMaterials->File, null, $RawMaterials->ID);    
+    $RawMaterials->getFileManipulator()->CopyFile($Sourse, $Destination);
     
-    $JsonManipulator->ExeLambda($RawMaterials);
+    $DestinationMp3 = $RawMaterials->getFileManipulator()->SetFile($RawMaterials->AudioFile, null, $RawMaterials->ID); 
     
-    die(json_encode($RawMaterials, JSON_PRETTY_PRINT)); 
+    $FFmpgeEngine = new FFmpgeEngine();
+    $FFmpgeEngine->setInputFile($Sourse);
+    $FFmpgeEngine->setOutputFile($DestinationMp3);
+    $FFmpgeEngine->_Exec();
+    
+    $RawMaterials->getJsonManipulator()->SaveJsonFile($RawMaterials);
+    
+    echo json_encode($RawMaterials, JSON_PRETTY_PRINT); 
 } 
 catch (Exception $Ex) {
     
-    $Error->Code = $Ex->getCode();
-    $Error->Message = $Ex->getMessage();
+    if(isset($RawMaterials)){
+        
+        $RawMaterials->RemoveID();
+    }
+    
+    $Error = array("Code" => $Ex->getCode(), "Message" => $Ex->getMessage());
     
     $ErrorDetails = array("Error Details" => $Error);
     
     die(json_encode($ErrorDetails, JSON_PRETTY_PRINT));  
+}
+ finally {
+    unset($Variable);
+    unset($RawMaterials);
+    
+    exit();
 }

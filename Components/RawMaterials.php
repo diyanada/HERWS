@@ -10,13 +10,15 @@ class RawMaterials extends HREBase  {
     public $AudioFile = null;
     public $Duration = null;
     public $TempFile = null;
+    public $Height = null;
+    public $Width = null;
             
     function __construct() {
         
         parent::__construct(StructDerectory::RawMaterials);
         
-        $this->File = $this->ID . ".mp4";
-        $this->AudioFile = $this->ID . ".aac";
+        $this->File = "Video.mp4";
+        $this->AudioFile = "Audio.mp3";
     }
 
 

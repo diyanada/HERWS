@@ -3,28 +3,18 @@
 namespace Core;
 
 require_once ( dirname(__FILE__) . '/../Components/StructDerectory.php');
+require_once ( dirname(__FILE__) . '/Manipulator.php');
 
-class JsonManipulator {
-    
-    protected $DataDirectory = "D:/Project-Data/HRE/";
+use Components\StructDerectory;
+use Components\Temp;
+use Exception;
 
-    protected $StructDerectory = null;
+class JsonManipulator extends Manipulator {
     
     function __construct($StructDerectory) {
         
-        $this->StructDerectory = $StructDerectory;
-    }
-    
-    function setStructDerectory($StructDerectory) {
-        
-        $this->StructDerectory = $StructDerectory;
-    }
-    
-    function getDataDirectory() {
-        
-        return $this->DataDirectory;
-    }
-    
+        parent::__construct($StructDerectory);
+    }    
     //---------------------Private Functions
     
     protected function ReadFile($FileName, $Derectory){
@@ -33,7 +23,7 @@ class JsonManipulator {
         
         if (!file_exists($FileLocation)) {
 
-            throw new \Exception("The file does not exist. Unable to save file.", "2010");
+            throw new Exception("The file does not exist. Unable to read file.", "2010");
         }
 
         $File = file_get_contents($FileLocation);
@@ -60,15 +50,15 @@ class JsonManipulator {
     
     private function SortHand() {
         
-        if ($this->StructDerectory == \Components\StructDerectory::ChildFrameSets) {
+        if ($this->StructDerectory == StructDerectory::ChildFrameSets) {
             
             return "HRECFS";
         }
-        else if ($this->StructDerectory == \Components\StructDerectory::FrameSets) {
+        else if ($this->StructDerectory == StructDerectory::FrameSets) {
             
             return "HREFS";
         }
-        else if ($this->StructDerectory == \Components\StructDerectory::RawMaterials) {
+        else if ($this->StructDerectory == StructDerectory::RawMaterials) {
             
             return "HRERM";
         }
@@ -103,27 +93,39 @@ class JsonManipulator {
         return $ID;
     }
     
+    public function RemoveID($ID) {
+        
+        $GuideJson = $this->ReadGuideFile();       
+        
+        if (in_array($ID, $GuideJson)) 
+        {
+            unset($GuideJson[array_search($ID,$GuideJson)]);
+        }
+        
+        $this->SaveGuideFile($GuideJson);
+        
+        return $ID;
+    }
+    
     public function ReadJsonFile($ID) {
         
         return $this->ReadFile($ID . ".json", $this->StructDerectory . "/" . $ID);
+    }
+    
+    public function ReadOtherJsonFile($ID, $StructDerectory) {
+        
+        return $this->ReadFile($ID . ".json", $StructDerectory . "/" . $ID);
+    }
+    
+    public function ReadTempJsonFile($ID) {
+        
+        return $this->ReadFile($ID , StructDerectory::Temp . "/" . Temp::Json);
     }
     
     public function SaveJsonFile($Json) {       
         
         return $this->SaveFile($Json, $Json->ID . ".json", $this->StructDerectory . "/" . $Json->ID);
         
-    }
-    
-    public function ExeLambda($Json, $Directory = null) {
-        
-        if($Directory == null){
-            
-            $this->SaveFile($Json, $Json->ID . ".json", $this->StructDerectory . "/ToLambda");
-        }
-        else{
-            
-            $this->SaveFile($Json, $Json->ID . ".json", $this->StructDerectory . "/ToLambda/" . $Directory);
-        }
     }
 
     

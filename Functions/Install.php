@@ -1,14 +1,35 @@
 <?php
 
 require_once ( dirname(__FILE__) . '/../Components/StructDerectory.php');
-require_once ( dirname(__FILE__) . '/../Core/JsonManipulatorS3.php');
+require_once ( dirname(__FILE__) . '/../Core/JsonManipulator.php');
+require_once ( dirname(__FILE__) . '/../Core/FileManipulator.php');
 
-use Core\JsonManipulatorS3;
+use Core\JsonManipulator;
+use Core\FileManipulator;
 use Components\StructDerectory;
+use Components\Temp;
 
 try {
     
-    $JsonManipulator = new JsonManipulatorS3(StructDerectory::ChildFrameSets);    
+    $FileManipulator = new FileManipulator(StructDerectory::ChildFrameSets);
+    
+    $Directorys = array();
+    
+    array_push($Directorys, $FileManipulator->getDataDirectory() . StructDerectory::ChildFrameSets);
+    array_push($Directorys, $FileManipulator->getDataDirectory() . StructDerectory::FrameSets);
+    array_push($Directorys, $FileManipulator->getDataDirectory() . StructDerectory::RawMaterials);
+    array_push($Directorys, $FileManipulator->getDataDirectory() . StructDerectory::Temp);
+    
+    array_push($Directorys, $FileManipulator->getDataDirectory() . StructDerectory::Temp . "/" . Temp::Image);
+    array_push($Directorys, $FileManipulator->getDataDirectory() . StructDerectory::Temp . "/" . Temp::Json);
+    array_push($Directorys, $FileManipulator->getDataDirectory() . StructDerectory::Temp . "/" . Temp::Video);
+    
+    foreach ($Directorys as $Value) {
+        
+        $FileManipulator->CreateDirectory($Value);
+    }
+    
+    $JsonManipulator = new JsonManipulator(StructDerectory::ChildFrameSets);  
     $JsonManipulator->SaveGuideFile(array());
     
     $JsonManipulator->setStructDerectory(StructDerectory::FrameSets);
@@ -21,9 +42,9 @@ try {
     
 } catch (Exception $Ex) {
     
-    $Error->Code = $Ex->getCode();
-    $Error->Message = $Ex->getMessage();
+    $Error = array("Code" => $Ex->getCode(), "Message" => $Ex->getMessage());
+    
     $ErrorDetails = array("Error Details" => $Error);
     
-    die(json_encode($ErrorDetails, JSON_PRETTY_PRINT));  
+    die(json_encode($ErrorDetails, JSON_PRETTY_PRINT));   
 }
