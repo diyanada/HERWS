@@ -41,7 +41,7 @@ try {
     $FFmpgeEngine = new FFmpgeEngine();
     $FFmpgeEngine->setInputFile($Sourse);
     $FFmpgeEngine->setOutputFile($DestinationMp3);
-    $FFmpgeEngine->_Exec();
+    $FFmpgeEngine->start();
     
     $RawMaterials->getJsonManipulator()->SaveJsonFile($RawMaterials);
     

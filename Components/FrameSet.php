@@ -28,7 +28,7 @@ class FrameSet extends HREBase  {
         
         $FrameCount = count($this->Frames);
         
-        return ($FrameCount  <= $this->FrameCount);     
+        return ($FrameCount  < $this->FrameCount);     
     }
     
     public function CreateFrame() {
@@ -39,9 +39,9 @@ class FrameSet extends HREBase  {
         
         $Frame->ID = "HREF" . ($FrameCount + 1);
         $Frame->FrameSetID = $this->ID;
-        $Frame->FrameNumber = $FrameCount;        
+        $Frame->FrameNumber = $FrameCount + 1;        
             
-        array_push($this->Frames, $Frame);
+        array_push($this->Frames, array($Frame->ID => $Frame));
 
         return $Frame;                  
     }
@@ -55,6 +55,7 @@ class ChildFrameSet extends HREBase{
     public $Height = null;
     public $Width = null;    
     public $FrameCount = null;
+    public $BaseFrameSet = null;
             
     function __construct() {
         
@@ -76,7 +77,7 @@ class ChildFrameSet extends HREBase{
         $Frame->FrameSetID = $this->ID;
         $Frame->FrameNumber = $FrameNumber;        
             
-        array_push($this->Frames, $Frame);
+        array_push($this->Frames, array($Frame->ID => $Frame));
 
         return $Frame;      
     }

@@ -18,6 +18,7 @@ try {
     array_push($Directorys, $FileManipulator->getDataDirectory() . StructDerectory::ChildFrameSets);
     array_push($Directorys, $FileManipulator->getDataDirectory() . StructDerectory::FrameSets);
     array_push($Directorys, $FileManipulator->getDataDirectory() . StructDerectory::RawMaterials);
+    array_push($Directorys, $FileManipulator->getDataDirectory() . StructDerectory::FinalOutputs);
     array_push($Directorys, $FileManipulator->getDataDirectory() . StructDerectory::Temp);
     
     array_push($Directorys, $FileManipulator->getDataDirectory() . StructDerectory::Temp . "/" . Temp::Image);
@@ -37,6 +38,9 @@ try {
     
     $JsonManipulator->setStructDerectory(StructDerectory::RawMaterials);
     $JsonManipulator->SaveGuideFile(array());
+    
+    $JsonManipulator->setStructDerectory(StructDerectory::FinalOutputs);
+    $JsonManipulator->SaveGuideFile(array());    
     
     die(json_encode(array("Status" => "Complite") , JSON_PRETTY_PRINT)); 
     

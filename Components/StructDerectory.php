@@ -9,6 +9,7 @@ class StructDerectory {
     const RawMaterials = "RawMaterials";
     const FrameSets = "FrameSets";
     const ChildFrameSets = "ChildFrameSets";
+    const FinalOutputs = "FinalOutputs";
     const Temp = "Temp";
 }
 

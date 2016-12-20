@@ -6,6 +6,7 @@ require_once ( dirname(__FILE__) . '/../Components/StructDerectory.php');
 require_once ( dirname(__FILE__) . '/Manipulator.php');
 
 use Exception;
+use Components\StructDerectory;
 
 class FileManipulator extends Manipulator {
     
@@ -21,18 +22,34 @@ class FileManipulator extends Manipulator {
         }
         
         if($Type == NULL){
+            
             $File = $this->DataDirectory . $StructDerectory . "/" . $Name;
         }
         else{
+            
             $File = $this->DataDirectory . $StructDerectory . "/" . $Type . "/" . $Name;
         }
         
         if (!file_exists($File)) {
 
-            throw new \Exception("The file does not exist.", "2010");
+            throw new Exception("The file does not exist.", "2010");
         }
         
         return $File;
+    } 
+    
+    public function ReadCildImage($Name, $CFSID) { 
+        
+        
+        $File = $this->DataDirectory . StructDerectory::ChildFrameSets . "/" . $CFSID . "/" . $Name;
+        
+        
+        if (!file_exists($File)) {
+            return null;
+        }        
+        else{
+            return $File;        
+        }
     } 
     
     public function SetFile($Name, $StructDerectory = null, $Type = null) { 

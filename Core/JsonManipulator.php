@@ -62,6 +62,10 @@ class JsonManipulator extends Manipulator {
             
             return "HRERM";
         }
+        else if ($this->StructDerectory == StructDerectory::FinalOutputs) {
+            
+            return "HREFO";
+        }
     }
     
     //---------------------Public Functions

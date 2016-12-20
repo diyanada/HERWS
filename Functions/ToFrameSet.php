@@ -10,7 +10,7 @@ require_once ( dirname(__FILE__) . '/../Core/FFmpgeEngine.php');
 use Components\FrameSet;
 use Components\StructDerectory;
 use Core\Variable;
-use Core\FFmpgeEngine;
+use Core\FFmpgeEnginents;
 
 try {
            
@@ -21,16 +21,22 @@ try {
     $RMJson = $FrameSet->getJsonManipulator()->ReadOtherJsonFile($RMID, StructDerectory::RawMaterials);
     
     $SourseVideo = $FrameSet->getFileManipulator()->ReadFile($RMJson["File"], StructDerectory::RawMaterials, $RMJson["ID"]);
-    $DestinationFrame = $FrameSet->getFileManipulator()->SetFile("Frame_%d.bmp", null, $FrameSet->ID); 
+    $DestinationFrame = $FrameSet->getFileManipulator()->SetFile("HREF%d.bmp", null, $FrameSet->ID); 
     
-    $FFmpgeEngine = new FFmpgeEngine();
+    $Directory = $FrameSet->getFileManipulator()->SetFile($FrameSet->ID);
+    $FrameSet->getFileManipulator()->CreateDirectory($Directory);
+    
+    $FFmpgeEngine = new FFmpgeEnginents();
     $FFmpgeEngine->setInputFile($SourseVideo);
     $FFmpgeEngine->setOutputFile($DestinationFrame);
-    $FFmpgeEngine->_Exec();
+    $FFmpgeEngine->run();
+    
+    $Files = new FilesystemIterator($Directory, FilesystemIterator::SKIP_DOTS);
+    $FileCount = iterator_count($Files);
     
     $FrameSet->Height = $RMJson["Height"];
     $FrameSet->Width = $RMJson["Width"];
-    $FrameSet->FrameCount = round($RMJson["Duration"] / $FrameSet->getFPSGap(), 0, PHP_ROUND_HALF_DOWN) - 3;
+    $FrameSet->FrameCount = $FileCount;
     $FrameSet->AudioFile = $RMJson["AudioFile"];
     
     while ($FrameSet->FramePossible()) {
@@ -38,13 +44,9 @@ try {
         $FrameSet->CreateFrame();
     }
     
-    $Directory = $FrameSet->getFileManipulator()->SetFile($FrameSet->ID);
-    $FrameSet->getFileManipulator()->CreateDirectory($Directory);
-    
     $Sourse = $FrameSet->getFileManipulator()->ReadFile($FrameSet->AudioFile, StructDerectory::RawMaterials, $RMJson["ID"]);
     $Destination = $FrameSet->getFileManipulator()->SetFile($FrameSet->AudioFile, null, $FrameSet->ID);    
-    $FrameSet->getFileManipulator()->CopyFile($Sourse, $Destination);
-        
+    $FrameSet->getFileManipulator()->CopyFile($Sourse, $Destination);        
     
     $FrameSet->getJsonManipulator()->SaveJsonFile($FrameSet);
     

@@ -30,6 +30,7 @@ try {
     $ChildFrameSet->Height = $FSJson["Height"];
     $ChildFrameSet->Width = $FSJson["Width"];
     $ChildFrameSet->FrameCount = $FSJson["FrameCount"];
+    $ChildFrameSet->BaseFrameSet = $FSJson["ID"];
     
     $Directory = $ChildFrameSet->getFileManipulator()->SetFile($ChildFrameSet->ID);
     $ChildFrameSet->getFileManipulator()->CreateDirectory($Directory);    
@@ -38,13 +39,19 @@ try {
     
     while ($ChildFrameSet->FramePossible($FrameNumber)) {
         
+        if(!isset($JsonFile[($FrameNumber - 1)])){
+            
+            throw new Exception("Invalid Json!.", "2005");
+        }
+        
         $FrameJson = $JsonFile[($FrameNumber - 1)];
         
         $Height = round($FrameJson["Height"]);
         $Width = round($FrameJson["Width"]);
         $Opacity = round($FrameJson["Opacity"]);
         
-        if($Height != 0 || $Width != 0 || $Opacity != 0){
+        if(!($Height == 0 || $Width == 0 || $Opacity == 0)){
+            
             
             $Frame = $ChildFrameSet->CreateFrame($FrameNumber);
             $DestinationImage = $ChildFrameSet->getFileManipulator()->SetFile($Frame->ID . ".bmp", null, $ChildFrameSet->ID);
